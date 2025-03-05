@@ -1,0 +1,339 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>EquityEdge Calculator</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <style>
+        body {
+            font-family: 'Arial', sans-serif;
+            background-color: #f4f7fa;
+            margin: 0;
+            padding: 20px;
+            display: flex;
+            justify-content: center;
+        }
+        .container {
+            max-width: 900px;
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        }
+        h1 {
+            color: #2c3e50;
+            text-align: center;
+            margin-bottom: 20px;
+        }
+        form {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 30px;
+            position: relative;
+        }
+        form::after {
+            content: '';
+            position: absolute;
+            left: 50%;
+            top: 0;
+            bottom: 0;
+            width: 1px;
+            background: #d1d9e6;
+        }
+        .form-section {
+            padding: 15px;
+            border-radius: 8px;
+            border: 1px solid #d1d9e6;
+        }
+        .form-section.seller {
+            background: #e6f0fa;
+        }
+        .form-section.buyer {
+            background: #f0f5fa;
+        }
+        .form-section h3 {
+            color: #34495e;
+            margin: 0 0 15px;
+            font-size: 1.1em;
+            text-align: center;
+        }
+        label {
+            font-weight: bold;
+            color: #34495e;
+            display: block;
+            margin-bottom: 5px;
+        }
+        input {
+            padding: 10px;
+            border: 1px solid #b0c4de;
+            border-radius: 5px;
+            width: 100%;
+            box-sizing: border-box;
+            margin-bottom: 12px;
+            background: #fff;
+            font-size: 0.95em;
+        }
+        .button-group {
+            display: flex;
+            gap: 10px;
+            justify-content: flex-start;
+            margin-top: 10px;
+        }
+        button {
+            padding: 10px 20px;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            font-weight: bold;
+            transition: background 0.3s;
+        }
+        button[type="button"]:nth-child(1) {
+            background: #3498db;
+            color: white;
+        }
+        button[type="button"]:nth-child(1):hover {
+            background: #2980b9;
+        }
+        button[type="button"]:nth-child(2) {
+            background: #e74c3c;
+            color: white;
+        }
+        button[type="button"]:nth-child(2):hover {
+            background: #c0392b;
+        }
+        button#exportBtn {
+            background: #27ae60;
+            color: white;
+            margin-top: 20px;
+        }
+        button#exportBtn:hover {
+            background: #219653;
+        }
+        .results {
+            margin-top: 30px;
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+            animation: fadeIn 0.5s ease-in;
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+        .results-section {
+            padding: 15px;
+            border-radius: 8px;
+            background: #fff;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+        }
+        .seller-benefits {
+            border-left: 4px solid #2ecc71;
+        }
+        .buyer-benefits {
+            border-left: 4px solid #3498db;
+        }
+        h2 {
+            font-size: 1.2em;
+            margin: 0 0 10px;
+            color: #2c3e50;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        td {
+            padding: 8px;
+            border-bottom: 1px solid #eee;
+        }
+        .result-label {
+            font-weight: bold;
+            color: #34495e;
+        }
+        .result-label i {
+            margin-right: 5px;
+            color: #7f8c8d;
+        }
+        .result-value {
+            color: #2c3e50;
+        }
+        .result-description {
+            font-size: 0.9em;
+            color: #7f8c8d;
+        }
+        @media (max-width: 600px) {
+            form, .results {
+                grid-template-columns: 1fr;
+            }
+            form::after {
+                display: none;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>EquityEdge Calculator</h1>
+        <form id="calculatorForm">
+            <div class="form-section seller">
+                <h3>Seller's Existing Mortgage</h3>
+                <label for="existingMortgageBalance">Existing Mortgage Balance ($):</label>
+                <input type="number" id="existingMortgageBalance" name="existingMortgageBalance" min="0" step="0.01" required title="Remaining balance on the seller's current mortgage">
+                
+                <label for="monthlyMortgagePayment">Current Monthly Payment ($, P&I only):</label>
+                <input type="number" id="monthlyMortgagePayment" name="monthlyMortgagePayment" min="0" step="0.01" required title="Seller's current monthly principal and interest payment">
+                
+                <label for="existingInterestRate">Existing Interest Rate (%):</label>
+                <input type="number" id="existingInterestRate" name="existingInterestRate" min="0" step="0.01" required title="Annual interest rate of the seller's current mortgage">
+                
+                <div class="button-group">
+                    <button type="button" onclick="calculateResults()">Calculate</button>
+                    <button type="button" onclick="resetForm()">Reset</button>
+                </div>
+            </div>
+            
+            <div class="form-section buyer">
+                <h3>New Financing Terms</h3>
+                <label for="salesPrice">Sales Price ($):</label>
+                <input type="number" id="salesPrice" name="salesPrice" min="0" step="0.01" required title="The total price of the property">
+                
+                <label for="downPaymentPercentage">Down Payment Percentage (%):</label>
+                <input type="number" id="downPaymentPercentage" name="downPaymentPercentage" min="0" max="100" step="0.01" required title="Percentage of sales price paid upfront by the buyer">
+                
+                <label for="interestRate">New Loan Interest Rate (%):</label>
+                <input type="number" id="interestRate" name="interestRate" min="0" step="0.01" value="4.5" required title="Annual interest rate for the buyer's new loan">
+                
+                <label for="loanTerm">New Loan Term (Years):</label>
+                <input type="number" id="loanTerm" name="loanTerm" min="1" step="1" value="30" required title="Duration of the buyer's new loan">
+                
+                <label for="closingCostPercentage">Closing Costs (% of Sales Price):</label>
+                <input type="number" id="closingCostPercentage" name="closingCostPercentage" min="0" step="0.01" value="8" required title="Percentage of sales price covering fees and costs">
+            </div>
+        </form>
+        
+        <div class="results" id="resultsSection" style="display: none;">
+            <div class="results-section seller-benefits">
+                <h2>Seller Benefits</h2>
+                <table>
+                    <tr>
+                        <td class="result-label"><i class="fas fa-money-bill-wave"></i> Monthly Income</td>
+                        <td class="result-value" id="resultMonthlyIncome"></td>
+                    </tr>
+                    <tr>
+                        <td colspan="2" class="result-description">The extra cash the seller earns each month from the buyer's payment after covering their existing mortgage.</td>
+                    </tr>
+                    <tr>
+                        <td class="result-label"><i class="fas fa-hand-holding-usd"></i> Cash Received at Closing</td>
+                        <td class="result-value" id="resultCashAtClosing"></td>
+                    </tr>
+                    <tr>
+                        <td colspan="2" class="result-description">The net cash the seller receives at closing from the down payment, minus closing costs (wrap mortgage keeps existing loan in place).</td>
+                    </tr>
+                    <tr>
+                        <td class="result-label"><i class="fas fa-chart-line"></i> Equity Spread</td>
+                        <td class="result-value" id="resultEquitySpread"></td>
+                    </tr>
+                    <tr>
+                        <td colspan="2" class="result-description">The difference between the buyer's new loan amount and the seller's existing mortgage balance, showing potential gain or liability at balloon (e.g., 3-5 years).</td>
+                    </tr>
+                </table>
+            </div>
+            <div class="results-section buyer-benefits">
+                <h2>Buyer Benefits</h2>
+                <table>
+                    <tr>
+                        <td class="result-label"><i class="fas fa-coins"></i> Down Payment</td>
+                        <td class="result-value" id="resultDownPayment"></td>
+                    </tr>
+                    <tr>
+                        <td colspan="2" class="result-description">The initial cash the buyer pays upfront, reducing the loan amount needed.</td>
+                    </tr>
+                    <tr>
+                        <td class="result-label"><i class="fas fa-home"></i> New Loan Amount</td>
+                        <td class="result-value" id="resultNewLoanAmount"></td>
+                    </tr>
+                    <tr>
+                        <td colspan="2" class="result-description">The amount the buyer finances to purchase the property.</td>
+                    </tr>
+                    <tr>
+                        <td class="result-label"><i class="fas fa-calendar-alt"></i> Monthly Payment</td>
+                        <td class="result-value" id="resultNewMonthlyPayment"></td>
+                    </tr>
+                    <tr>
+                        <td colspan="2" class="result-description">The buyer's monthly cost for the new loan, including principal and interest.</td>
+                    </tr>
+                </table>
+            </div>
+        </div>
+        <button id="exportBtn" style="display: none;" onclick="exportToPDF()">Download PDF</button>
+    </div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+    <script>
+        function formatCurrency(amount) {
+            return new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }).format(amount);
+        }
+
+        function calculateMonthlyPayment(loanAmount, annualRate, years) {
+            const monthlyRate = annualRate / 100 / 12;
+            const totalPayments = years * 12;
+            return (loanAmount * monthlyRate * Math.pow(1 + monthlyRate, totalPayments)) /
+                   (Math.pow(1 + monthlyRate, totalPayments) - 1);
+        }
+
+        function calculateResults() {
+            const salesPrice = parseFloat(document.getElementById('salesPrice').value);
+            const downPaymentPercentage = parseFloat(document.getElementById('downPaymentPercentage').value);
+            const existingMortgageBalance = parseFloat(document.getElementById('existingMortgageBalance').value);
+            const monthlyMortgagePayment = parseFloat(document.getElementById('monthlyMortgagePayment').value);
+            const existingInterestRate = parseFloat(document.getElementById('existingInterestRate').value);
+            const interestRate = parseFloat(document.getElementById('interestRate').value);
+            const loanTerm = parseFloat(document.getElementById('loanTerm').value);
+            const closingCostPercentage = parseFloat(document.getElementById('closingCostPercentage').value);
+
+            if ([salesPrice, downPaymentPercentage, existingMortgageBalance, monthlyMortgagePayment, existingInterestRate, interestRate, loanTerm, closingCostPercentage]
+                .some(val => isNaN(val) || val < 0)) {
+                alert("Please enter valid positive numbers in all fields.");
+                return;
+            }
+
+            const downPayment = salesPrice * (downPaymentPercentage / 100);
+            const newLoanAmount = salesPrice - downPayment;
+            const newMonthlyPayment = calculateMonthlyPayment(newLoanAmount, interestRate, loanTerm);
+            const monthlyIncome = newMonthlyPayment - monthlyMortgagePayment;
+            const closingCosts = salesPrice * (closingCostPercentage / 100);
+            const cashReceivedAtClosing = downPayment - closingCosts;
+            const equitySpread = newLoanAmount - existingMortgageBalance; // New balance - current balance
+
+            document.getElementById('resultDownPayment').textContent = formatCurrency(downPayment);
+            document.getElementById('resultNewLoanAmount').textContent = formatCurrency(newLoanAmount);
+            document.getElementById('resultNewMonthlyPayment').textContent = formatCurrency(newMonthlyPayment);
+            document.getElementById('resultMonthlyIncome').textContent = formatCurrency(monthlyIncome);
+            document.getElementById('resultCashAtClosing').textContent = formatCurrency(cashReceivedAtClosing);
+            document.getElementById('resultEquitySpread').textContent = formatCurrency(equitySpread);
+
+            const resultsSection = document.getElementById('resultsSection');
+            resultsSection.style.display = 'grid';
+            document.getElementById('exportBtn').style.display = 'block';
+        }
+
+        function resetForm() {
+            document.getElementById('calculatorForm').reset();
+            document.getElementById('resultsSection').style.display = 'none';
+            document.getElementById('exportBtn').style.display = 'none';
+        }
+
+        function exportToPDF() {
+            const element = document.getElementById('resultsSection');
+            const opt = {
+                margin: 0.5,
+                filename: 'EquityEdge_Results.pdf',
+                image: { type: 'jpeg', quality: 0.98 },
+                html2canvas: { scale: 2 },
+                jsPDF: { unit: 'in', format: 'letter', orientation: 'portrait' }
+            };
+            html2pdf().set(opt).from(element).save();
+        }
+    </script>
+</body>
+</html>
