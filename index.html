@@ -279,18 +279,115 @@
         }
 
         function formatInput(input) {
-            let value = input.value.replace(/[^\d]/g, ''); // Remove non-numeric chars
+            let value = input.value.replace(/[^\d.]/g, ''); // Remove non-numeric chars except dots
             if (value === '') return '$0';
-            const num = parseInt(value, 10); // Parse as integer (no decimals)
+            const num = parseFloat(value); // Parse as float to handle decimals
             if (isNaN(num)) return '$0';
             return new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD', minimumFractionDigits: 0, maximumFractionDigits: 0 }).format(num);
         }
 
         function cleanNumber(input) {
-            return parseInt(input.replace(/[^\d]/g, '')) || 0; // Parse as integer (no decimals)
+            return parseFloat(input.replace(/[^\d.]/g, '')) || 0; // Parse as float (handles decimals)
         }
 
         // Apply formatting to dollar inputs
         document.querySelectorAll('.dollar-input').forEach(input => {
             input.addEventListener('input', function() {
-                this.value = format
+                this.value = formatInput(this);
+            });
+        });
+
+        function calculateMonthlyPayment(loanAmount, annualRate, years) {
+            const monthlyRate = annualRate / 100 / 12;
+            const totalPayments = years * 12;
+            return (loanAmount * monthlyRate * Math.pow(1 + monthlyRate, totalPayments)) /
+                   (Math.pow(1 + monthlyRate, totalPayments) - 1);
+        }
+
+        function calculateResults() {
+            // Get input values
+            const salesPrice = cleanNumber(document.getElementById('salesPrice').value);
+            const downPaymentPercentage = parseFloat(document.getElementById('downPaymentPercentage').value);
+            const existingMortgageBalance = cleanNumber(document.getElementById('existingMortgageBalance').value);
+            const monthlyMortgagePayment = cleanNumber(document.getElementById('monthlyMortgagePayment').value);
+            const existingInterestRate = parseFloat(document.getElementById('existingInterestRate').value);
+            const interestRate = parseFloat(document.getElementById('interestRate').value);
+            const loanTerm = parseFloat(document.getElementById('loanTerm').value);
+            const closingCostPercentage = parseFloat(document.getElementById('closingCostPercentage').value);
+
+            // Debug: Log the input values
+            console.log('Input Values:', {
+                salesPrice,
+                downPaymentPercentage,
+                existingMortgageBalance,
+                monthlyMortgagePayment,
+                existingInterestRate,
+                interestRate,
+                loanTerm,
+                closingCostPercentage
+            });
+
+            // Validate inputs
+            if ([salesPrice, downPaymentPercentage, existingMortgageBalance, monthlyMortgagePayment, existingInterestRate, interestRate, loanTerm, closingCostPercentage]
+                .some(val => isNaN(val) || val < 0)) {
+                alert("Please enter valid positive numbers in all fields.");
+                return;
+            }
+
+            // Perform calculations
+            const downPayment = salesPrice * (downPaymentPercentage / 100);
+            const newLoanAmount = salesPrice - downPayment;
+            const newMonthlyPayment = calculateMonthlyPayment(newLoanAmount, interestRate, loanTerm);
+            const monthlyIncome = newMonthlyPayment - monthlyMortgagePayment;
+            const closingCosts = salesPrice * (closingCostPercentage / 100);
+            const cashReceivedAtClosing = downPayment - closingCosts;
+            const equitySpread = newLoanAmount - existingMortgageBalance;
+
+            // Debug: Log the calculated values
+            console.log('Calculated Values:', {
+                downPayment,
+                newLoanAmount,
+                newMonthlyPayment,
+                monthlyIncome,
+                closingCosts,
+                cashReceivedAtClosing,
+                equitySpread
+            });
+
+            // Update the DOM with results
+            document.getElementById('resultDownPayment').textContent = formatCurrency(downPayment);
+            document.getElementById('resultNewLoanAmount').textContent = formatCurrency(newLoanAmount);
+            document.getElementById('resultNewMonthlyPayment').textContent = formatCurrency(newMonthlyPayment);
+            document.getElementById('resultMonthlyIncome').textContent = formatCurrency(monthlyIncome);
+            document.getElementById('resultCashAtClosing').textContent = formatCurrency(cashReceivedAtClosing);
+            document.getElementById('resultEquitySpread').textContent = formatCurrency(equitySpread);
+
+            // Show the results section
+            const resultsSection = document.getElementById('resultsSection');
+            resultsSection.style.display = 'grid';
+            document.getElementById('exportBtn').style.display = 'block';
+        }
+
+        function resetForm() {
+            document.getElementById('calculatorForm').reset();
+            document.querySelectorAll('.dollar-input').forEach(input => {
+                input.value = '$0';
+            });
+            document.getElementById('resultsSection').style.display = 'none';
+            document.getElementById('exportBtn').style.display = 'none';
+        }
+
+        function exportToPDF() {
+            const element = document.getElementById('resultsSection');
+            const opt = {
+                margin: 0.5,
+                filename: 'Results.pdf',
+                image: { type: 'jpeg', quality: 0.98 },
+                html2canvas: { scale: 2 },
+                jsPDF: { unit: 'in', format: 'letter', orientation: 'portrait' }
+            };
+            html2pdf().set(opt).from(element).save();
+        }
+    </script>
+</body>
+</html>
