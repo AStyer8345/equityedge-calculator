@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>EquityEdge Calculator</title>
+    <title>Calculator</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
     <style>
         body {
@@ -26,11 +26,6 @@
             margin: 0 auto 20px; /* Center the logo and add space below */
             max-width: 200px; /* Adjust the size of the logo */
             height: auto;
-        }
-        h1 {
-            color: #2c3e50;
-            text-align: center;
-            margin-bottom: 20px;
         }
         form {
             display: grid;
@@ -183,7 +178,6 @@
 <body>
     <div class="container">
         <img src="equityedge-logo.png" alt="EquityEdge Logo" class="logo">
-        <h1>EquityEdge Calculator</h1>
         <form id="calculatorForm">
             <div class="form-section seller">
                 <h3>Seller's Existing Mortgage</h3>
@@ -299,73 +293,4 @@
         // Apply formatting to dollar inputs
         document.querySelectorAll('.dollar-input').forEach(input => {
             input.addEventListener('input', function() {
-                this.value = formatInput(this);
-            });
-        });
-
-        function calculateMonthlyPayment(loanAmount, annualRate, years) {
-            const monthlyRate = annualRate / 100 / 12;
-            const totalPayments = years * 12;
-            return (loanAmount * monthlyRate * Math.pow(1 + monthlyRate, totalPayments)) /
-                   (Math.pow(1 + monthlyRate, totalPayments) - 1);
-        }
-
-        function calculateResults() {
-            const salesPrice = cleanNumber(document.getElementById('salesPrice').value);
-            const downPaymentPercentage = parseFloat(document.getElementById('downPaymentPercentage').value);
-            const existingMortgageBalance = cleanNumber(document.getElementById('existingMortgageBalance').value);
-            const monthlyMortgagePayment = cleanNumber(document.getElementById('monthlyMortgagePayment').value);
-            const existingInterestRate = parseFloat(document.getElementById('existingInterestRate').value);
-            const interestRate = parseFloat(document.getElementById('interestRate').value);
-            const loanTerm = parseFloat(document.getElementById('loanTerm').value);
-            const closingCostPercentage = parseFloat(document.getElementById('closingCostPercentage').value);
-
-            if ([salesPrice, downPaymentPercentage, existingMortgageBalance, monthlyMortgagePayment, existingInterestRate, interestRate, loanTerm, closingCostPercentage]
-                .some(val => isNaN(val) || val < 0)) {
-                alert("Please enter valid positive numbers in all fields.");
-                return;
-            }
-
-            const downPayment = salesPrice * (downPaymentPercentage / 100);
-            const newLoanAmount = salesPrice - downPayment;
-            const newMonthlyPayment = calculateMonthlyPayment(newLoanAmount, interestRate, loanTerm);
-            const monthlyIncome = newMonthlyPayment - monthlyMortgagePayment;
-            const closingCosts = salesPrice * (closingCostPercentage / 100);
-            const cashReceivedAtClosing = downPayment - closingCosts;
-            const equitySpread = newLoanAmount - existingMortgageBalance; // New balance - current balance
-
-            document.getElementById('resultDownPayment').textContent = formatCurrency(downPayment);
-            document.getElementById('resultNewLoanAmount').textContent = formatCurrency(newLoanAmount);
-            document.getElementById('resultNewMonthlyPayment').textContent = formatCurrency(newMonthlyPayment);
-            document.getElementById('resultMonthlyIncome').textContent = formatCurrency(monthlyIncome);
-            document.getElementById('resultCashAtClosing').textContent = formatCurrency(cashReceivedAtClosing);
-            document.getElementById('resultEquitySpread').textContent = formatCurrency(equitySpread);
-
-            const resultsSection = document.getElementById('resultsSection');
-            resultsSection.style.display = 'grid';
-            document.getElementById('exportBtn').style.display = 'block';
-        }
-
-        function resetForm() {
-            document.getElementById('calculatorForm').reset();
-            document.querySelectorAll('.dollar-input').forEach(input => {
-                input.value = '$0';
-            });
-            document.getElementById('resultsSection').style.display = 'none';
-            document.getElementById('exportBtn').style.display = 'none';
-        }
-
-        function exportToPDF() {
-            const element = document.getElementById('resultsSection');
-            const opt = {
-                margin: 0.5,
-                filename: 'EquityEdge_Results.pdf',
-                image: { type: 'jpeg', quality: 0.98 },
-                html2canvas: { scale: 2 },
-                jsPDF: { unit: 'in', format: 'letter', orientation: 'portrait' }
-            };
-            html2pdf().set(opt).from(element).save();
-        }
-    </script>
-</body>
-</html>
+                this.value = format
